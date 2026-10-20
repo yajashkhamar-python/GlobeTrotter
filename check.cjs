@@ -1,0 +1,1 @@
+const {Pool}=require('pg'); require('dotenv').config(); const p=new Pool({connectionString:process.env.DATABASE_URL}); p.query("SELECT column_name FROM information_schema.columns WHERE table_name='trip_activities'").then(r=>{console.log(r.rows);p.end()});
