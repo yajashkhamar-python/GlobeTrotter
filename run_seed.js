@@ -3,11 +3,19 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 const { Pool } = pg;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const isCloudDb = process.env.DATABASE_URL?.includes('render.com') ||
+                   process.env.DATABASE_URL?.includes('neon.tech') ||
+                   process.env.DATABASE_URL?.includes('supabase.co');
+
 const pool = new Pool({
-  connectionString: 'postgresql://postgres:postgres@localhost:5432/globetrotter'
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/globetrotter',
+  ssl: isCloudDb ? { rejectUnauthorized: false } : false,
 });
 
 const sql = fs.readFileSync(path.join(__dirname, 'server/db/seed_enhanced.sql'), 'utf8');

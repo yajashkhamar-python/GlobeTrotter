@@ -1,3 +1,4 @@
+
 # GlobeTrotter
 
 > A modern, full-stack travel planning platform for designing multi-city adventures, generating intelligent day-wise itineraries, organizing activities on interactive Leaflet maps, tracking travel expenses, and collaborating with an integrated Gemini AI Copilot.

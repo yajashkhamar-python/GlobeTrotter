@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, CalendarDays, Activity, Wallet, Share2, Copy, CheckCircle, Clock, XCircle, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { fetchApi } from '../services/api';
+import { fetchApi, API_URL } from '../services/api';
 import EmptyState from '../components/common/EmptyState';
 import '../components/common/common.css';
 import './PublicTrip.css';
@@ -37,7 +37,7 @@ export default function PublicTrip() {
   useEffect(() => {
     const loadTrip = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/shared/${token}`);
+        const response = await fetch(`${API_URL}/shared/${token}`);
         const data = await response.json();
         
         if (data.success) {

@@ -1,10 +1,16 @@
 import pkg from 'pg';
 const { Pool } = pkg;
 import dotenv from 'dotenv';
+dotenv.config();
 dotenv.config({ path: '../.env' });
 
+const isCloudDb = process.env.DATABASE_URL?.includes('render.com') ||
+                   process.env.DATABASE_URL?.includes('neon.tech') ||
+                   process.env.DATABASE_URL?.includes('supabase.co');
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/globetrotter',
+  ssl: isCloudDb ? { rejectUnauthorized: false } : false,
 });
 
 const updates = [

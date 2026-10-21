@@ -4,8 +4,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isCloudDb = process.env.DATABASE_URL?.includes('render.com') ||
+                   process.env.DATABASE_URL?.includes('neon.tech') ||
+                   process.env.DATABASE_URL?.includes('supabase.co') ||
+                   process.env.DATABASE_URL?.includes('sslmode=require');
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: isCloudDb ? { rejectUnauthorized: false } : false,
 });
 
 // Test the connection when the application starts

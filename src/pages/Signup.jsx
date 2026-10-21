@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe, Eye, EyeOff } from 'lucide-react';
+import { API_URL } from '../services/api';
 import './auth.css';
 
 function getPasswordStrength(pw) {
@@ -45,7 +46,7 @@ export default function Signup() {
     setLoading(true);
     
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
