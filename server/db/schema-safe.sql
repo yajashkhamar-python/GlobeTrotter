@@ -132,3 +132,13 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_trips_user_id ON trips(user_id);
+CREATE INDEX IF NOT EXISTS idx_trip_stops_trip_id ON trip_stops(trip_id);
+CREATE INDEX IF NOT EXISTS idx_trip_stops_city_id ON trip_stops(city_id);
+CREATE INDEX IF NOT EXISTS idx_trip_activities_stop_id ON trip_activities(trip_stop_id);
+CREATE INDEX IF NOT EXISTS idx_trip_activities_activity_id ON trip_activities(activity_id);
+CREATE INDEX IF NOT EXISTS idx_activities_city_id ON activities(city_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_trip_id ON expenses(trip_id);
+CREATE INDEX IF NOT EXISTS idx_saved_destinations_user_id ON saved_destinations(user_id);
+CREATE INDEX IF NOT EXISTS idx_shared_trips_trip_id ON shared_trips(trip_id);
+CREATE INDEX IF NOT EXISTS idx_shared_trips_token ON shared_trips(share_token);
