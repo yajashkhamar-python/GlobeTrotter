@@ -99,6 +99,30 @@ async function startServer() {
     await db.query('SELECT 1');
     console.log('Successfully connected to PostgreSQL database.');
 
+    // 1b. Temporary diagnostic check for schema/database context
+    try {
+      const diagQuery = `
+        SELECT 
+          current_database() AS database_name, 
+          current_schema() AS current_schema, 
+          current_setting('search_path') AS search_path, 
+          to_regclass('public.users')::text AS public_users_table, 
+          to_regclass('users')::text AS unqualified_users_table
+      `;
+      const diagRes = await db.query(diagQuery);
+      if (diagRes && diagRes.rows && diagRes.rows[0]) {
+        console.log('[DB Diagnostic]', {
+          database_name: diagRes.rows[0].database_name,
+          current_schema: diagRes.rows[0].current_schema,
+          search_path: diagRes.rows[0].search_path,
+          public_users_table: diagRes.rows[0].public_users_table,
+          unqualified_users_table: diagRes.rows[0].unqualified_users_table,
+        });
+      }
+    } catch (diagErr) {
+      console.warn('[DB Diagnostic Error]', diagErr.message);
+    }
+
     // 2. Start HTTP server
     app.listen(PORT, (err) => {
       if (err) {
