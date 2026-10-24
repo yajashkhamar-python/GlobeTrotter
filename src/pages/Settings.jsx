@@ -186,14 +186,15 @@ export default function Settings() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: '48px', alignItems: 'start' }}>
+      <div className="settings-layout">
         
         {/* SIDEBAR NAVIGATION */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'sticky', top: '120px' }}>
+        <div className="settings-tabs">
           {tabs.map(tab => (
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              className="settings-tab-btn"
               style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
                 padding: '12px 16px', borderRadius: '12px',
@@ -201,7 +202,6 @@ export default function Settings() {
                 background: activeTab === tab.id ? 'var(--color-accent-light)' : 'transparent',
                 color: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                 transition: 'all 0.2s',
-                width: '100%',
                 textAlign: 'left'
               }}
             >

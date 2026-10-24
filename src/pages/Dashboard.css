@@ -542,22 +542,175 @@
 }
 .hover-lift:hover .img-zoom-container img { transform: scale(1.05); }
 
+/* Travel Analytics Section */
+.dash-analytics-section {
+  margin-top: 8px;
+}
+
+.dash-analytics-card {
+  background: var(--d-surface);
+  border-radius: var(--d-radius-md);
+  padding: 24px;
+  box-shadow: var(--d-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.analytics-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.analytics-metric-box {
+  background: #f8fafc;
+  border: 1px solid var(--d-border);
+  border-radius: var(--d-radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.amb-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.amb-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.amb-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--d-text-gray);
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+}
+
+.amb-val {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--d-text-dark);
+  line-height: 1.2;
+}
+
+.amb-sub {
+  font-size: 11px;
+  color: var(--d-text-light);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.analytics-chart-container {
+  border-top: 1px solid var(--d-border);
+  padding-top: 18px;
+}
+
+.analytics-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.analytics-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.analytics-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.analytics-bar-row:hover {
+  background: #f8fafc;
+}
+
+.analytics-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.abr-name {
+  color: var(--d-text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.abr-count {
+  color: var(--d-text-gray);
+  font-size: 11px;
+}
+
+.analytics-bar-track {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.analytics-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .dash-main-grid { grid-template-columns: 1fr 300px; }
+  .analytics-metrics-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 1024px) {
   .dash-main-grid { grid-template-columns: 1fr; }
   .dash-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .analytics-metrics-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .dashboard-page { padding: 16px; }
-  .dash-hero { height: auto; padding: 24px; }
+  .dashboard-page { padding: 16px 12px; }
+  .dash-hero { height: auto; padding: 20px 16px; }
+  .dash-hero-title { font-size: 24px; }
+  .dash-hero-subtitle { font-size: 14px; margin-bottom: 16px; }
   .dash-hero-content { flex-direction: column; text-align: center; gap: 16px; }
-  .dash-stats-row { grid-template-columns: 1fr; }
+  .dash-hero-actions { justify-content: center; flex-wrap: wrap; }
+  .dash-stats-row { grid-template-columns: 1fr; gap: 12px; }
   .trip-panel-top { flex-direction: column; }
+  .trip-panel-top .img-zoom-container { width: 100% !important; height: 180px !important; }
   .activities-grid { grid-template-columns: 1fr; }
+  .analytics-metrics-grid { grid-template-columns: 1fr; }
+  .budget-donut-container { flex-direction: column; align-items: center; text-align: center; }
   .bot-banner-content { flex-direction: column; text-align: center; gap: 16px; }
+}
+
+@media (max-width: 480px) {
+  .dashboard-page { padding: 12px 8px; }
+  .dash-stat-card { padding: 16px; }
+  .dash-trip-panel { padding: 16px; }
+  .widget-card { padding: 16px; }
+  .dash-analytics-card { padding: 16px; }
+  .quick-actions-grid { grid-template-columns: 1fr; }
 }

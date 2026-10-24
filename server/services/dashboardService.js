@@ -63,7 +63,7 @@ class DashboardService {
       totalPlannedBudget
     };
 
-    // 4. Upcoming Itinerary (For the next trip)
+    // 4. Upcoming Itinerary & Budget (For nextTrip or active budgeted trip)
     let upcomingItinerary = [];
     let budgetSummary = null;
 
@@ -81,35 +81,72 @@ class DashboardService {
       
       upcomingItinerary = itineraryRes.rows;
 
-      const expensesRes = await pool.query(`
-        SELECT category, amount FROM expenses WHERE trip_id = $1
-      `, [nextTrip.id]);
-
-      const expenses = expensesRes.rows;
-      const totalSpent = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
-      const remaining = parseFloat(nextTrip.budget_limit) - totalSpent;
-      const spentPercentage = nextTrip.budget_limit > 0 ? Math.min(100, (totalSpent / nextTrip.budget_limit) * 100) : 0;
-      
-      const categories = expenses.reduce((acc, exp) => {
-        const cat = exp.category || 'other';
-        acc[cat] = (acc[cat] || 0) + parseFloat(exp.amount);
-        return acc;
-      }, {});
-
-      budgetSummary = {
-        totalBudget: parseFloat(nextTrip.budget_limit),
-        totalSpent,
-        remaining,
-        spentPercentage,
-        categories
-      };
-
       const nextTripCities = await pool.query(`
         SELECT c.name FROM trip_stops ts 
         JOIN cities c ON ts.city_id = c.id 
         WHERE ts.trip_id = $1 ORDER BY ts.stop_order
       `, [nextTrip.id]);
       nextTrip.destination_names = nextTripCities.rows.map(r => r.name).join(' • ');
+    }
+
+    // Determine target trip for Budget Overview:
+    // 1) Upcoming trip that has an active configured budget (budget_limit > 0)
+    // 2) nextTrip if it has logged expenses
+    // 3) Any user trip with budget_limit > 0 or expenses
+    // 4) Fallback to nextTrip or allTrips[0]
+    let budgetTrip = upcomingTripsAll.find(t => (parseFloat(t.budget_limit) || 0) > 0);
+    if (!budgetTrip && nextTrip) {
+      budgetTrip = nextTrip;
+    }
+    if (!budgetTrip && allTrips.length > 0) {
+      const tripWithBudgetOrExp = allTrips.find(t => (parseFloat(t.budget_limit) || 0) > 0);
+      budgetTrip = tripWithBudgetOrExp || allTrips[0];
+    }
+
+    if (budgetTrip) {
+      const expensesRes = await pool.query(`
+        SELECT category, amount FROM expenses WHERE trip_id = $1
+      `, [budgetTrip.id]);
+
+      const expenses = expensesRes.rows;
+      let totalSpent = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+      const budgetLimitVal = parseFloat(budgetTrip.budget_limit) || 0;
+
+      // Use the exact standard categories map as getBudgetSummary in expenseController
+      const categories = {
+        Flights: 0,
+        Accommodation: 0,
+        Activities: 0,
+        Meals: 0,
+        Transport: 0,
+        'Shopping & Other': 0,
+        Other: 0
+      };
+
+      expenses.forEach(exp => {
+        const cat = exp.category;
+        const amt = parseFloat(exp.amount) || 0;
+        if (categories.hasOwnProperty(cat)) {
+          categories[cat] += amt;
+        } else {
+          categories.Other += amt;
+        }
+      });
+
+      const remaining = budgetLimitVal > 0 ? parseFloat((budgetLimitVal - totalSpent).toFixed(2)) : 0;
+      const spentPercentage = budgetLimitVal > 0 ? Math.min(100, (totalSpent / budgetLimitVal) * 100) : 0;
+      const isOverBudget = budgetLimitVal > 0 && totalSpent > budgetLimitVal;
+
+      budgetSummary = {
+        tripId: budgetTrip.id,
+        tripName: budgetTrip.name,
+        totalBudget: budgetLimitVal,
+        totalSpent,
+        remaining,
+        spentPercentage,
+        isOverBudget,
+        categories
+      };
     }
 
     // Populate destination names for ALL trips

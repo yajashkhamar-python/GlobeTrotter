@@ -451,9 +451,29 @@ ul, ol {
 }
 
 /* ------ Responsive Breakpoints ------ */
+.settings-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.settings-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 120px;
+}
+
+.settings-tab-btn {
+  width: 100%;
+}
+
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .settings-layout { gap: 24px; grid-template-columns: 200px 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -461,4 +481,29 @@ ul, ol {
   .grid-3 { grid-template-columns: 1fr; }
   .grid-2 { grid-template-columns: 1fr; }
   .page-container { padding: var(--space-5) var(--space-4); }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .settings-tabs {
+    flex-direction: row;
+    position: static;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  .settings-tabs::-webkit-scrollbar { display: none; }
+  .settings-tab-btn {
+    white-space: nowrap;
+    width: auto;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-container { padding: var(--space-4) 12px; }
+  .btn { min-height: 42px; }
+  .btn-sm { min-height: 36px; }
 }

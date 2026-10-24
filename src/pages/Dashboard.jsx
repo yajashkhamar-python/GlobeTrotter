@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { 
-  Map, Compass, CalendarDays, Wallet, Plus, ArrowRight, Building2, Ticket, Clock, MapPin, Globe, CheckCircle2, Sparkles, Wand2 
+  Map, Compass, CalendarDays, Wallet, Plus, ArrowRight, Building2, Ticket, Clock, MapPin, Globe, CheckCircle2, Sparkles, Wand2, TrendingUp, BarChart3, Activity 
 } from 'lucide-react';
 import { fetchApi } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -201,9 +201,25 @@ export default function Dashboard() {
                         <span><Building2 size={14}/> {trip.stop_count} cities</span>
                       </div>
                       <div className="trip-progress-bar">
-                        <div className="trip-progress-fill" style={{ width: tIdx === 0 ? '20%' : '0%' }}></div>
+                        {(() => {
+                          const actCount = Number(trip.activity_count || 0);
+                          const stopCount = Number(trip.stop_count || 0);
+                          // Calculate genuine planning completion: an itinerary with stops and scheduled activities
+                          // is considered progressing towards 100%. If activities >= 4, it's 100% planned.
+                          let pct = 0;
+                          if (actCount > 0) {
+                            pct = Math.min(100, Math.max(25, Math.round((actCount / Math.max(1, (stopCount * 3))) * 100)));
+                          } else if (stopCount > 0) {
+                            pct = 20; // Cities chosen, awaiting activities
+                          }
+                          return (
+                            <>
+                              <div className="trip-progress-fill" style={{ width: `${pct}%` }}></div>
+                              <div className="trip-progress-text" style={{ marginTop: '4px' }}>{pct}% planned</div>
+                            </>
+                          );
+                        })()}
                       </div>
-                      <div className="trip-progress-text">{tIdx === 0 ? '20%' : '0%'} planned</div>
                     </div>
                   </div>
                   
@@ -255,6 +271,118 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* Travel Analytics Section - Placed directly below the quote banner in the empty space */}
+            <div className="dash-analytics-section animate-fade-in delay-3" style={{ marginTop: '24px' }}>
+              <div className="section-header">
+                <div>
+                  <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <BarChart3 size={18} color="var(--d-primary)" /> Travel Analytics
+                  </h2>
+                  <div className="section-subtitle">Real-time breakdown of your itineraries, activities, and budget</div>
+                </div>
+              </div>
+
+              <div className="dash-analytics-card">
+                <div className="analytics-metrics-grid">
+                  <div className="analytics-metric-box">
+                    <div className="amb-icon-wrap" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                      <Map size={18} />
+                    </div>
+                    <div className="amb-content">
+                      <div className="amb-label">Trip Status</div>
+                      <div className="amb-val">
+                        <span style={{ color: '#2563eb', fontWeight: 700 }}>{upcomingTrips.length}</span> upcoming
+                        {recentTrips.length > 0 && <span style={{ color: 'var(--d-text-gray)', fontSize: '12px', fontWeight: 500 }}> · {recentTrips.length} past</span>}
+                      </div>
+                      <div className="amb-sub">Total {allTrips.length} curated journeys</div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-metric-box">
+                    <div className="amb-icon-wrap" style={{ background: '#ecfdf5', color: '#059669' }}>
+                      <Ticket size={18} />
+                    </div>
+                    <div className="amb-content">
+                      <div className="amb-label">Activity Density</div>
+                      <div className="amb-val">
+                        {allTrips.length > 0 ? (Number(stats.totalActivities || 0) / allTrips.length).toFixed(1) : 0} <span style={{ fontSize: '12px', color: 'var(--d-text-gray)', fontWeight: 500 }}>act / trip</span>
+                      </div>
+                      <div className="amb-sub">{stats.totalActivities || 0} scheduled experiences</div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-metric-box">
+                    <div className="amb-icon-wrap" style={{ background: '#fef3c7', color: '#d97706' }}>
+                      <Wallet size={18} />
+                    </div>
+                    <div className="amb-content">
+                      <div className="amb-label">Budget Allocation</div>
+                      <div className="amb-val">
+                        {stats.totalPlannedBudget > 0 ? `₹${(stats.totalPlannedBudget).toLocaleString()}` : 'Flexible'}
+                      </div>
+                      <div className="amb-sub">
+                        {budgetSummary?.spentPercentage != null && budgetSummary.spentPercentage > 0
+                          ? `${Math.round(budgetSummary.spentPercentage)}% active utilized`
+                          : 'Ready for travel'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="analytics-metric-box">
+                    <div className="amb-icon-wrap" style={{ background: '#f5f3ff', color: '#7c3aed' }}>
+                      <Globe size={18} />
+                    </div>
+                    <div className="amb-content">
+                      <div className="amb-label">Destination Reach</div>
+                      <div className="amb-val">
+                        {stats.totalDestinations || 0} <span style={{ fontSize: '12px', color: 'var(--d-text-gray)', fontWeight: 500 }}>destinations</span>
+                      </div>
+                      <div className="amb-sub">In itineraries & catalog</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress bars by trip */}
+                {allTrips.length > 0 && (
+                  <div className="analytics-chart-container">
+                    <div className="analytics-chart-header">
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--d-text-dark)' }}>Itinerary Readiness by Trip</div>
+                      <div style={{ fontSize: '11px', color: 'var(--d-text-gray)' }}>Based on scheduled stops & activities</div>
+                    </div>
+                    <div className="analytics-bars-list">
+                      {allTrips.slice(0, 4).map(trip => {
+                        const actCount = Number(trip.activity_count || 0);
+                        const stopCount = Number(trip.stop_count || 0);
+                        let readiness = 0;
+                        if (actCount > 0) {
+                          readiness = Math.min(100, Math.max(25, Math.round((actCount / Math.max(1, (stopCount * 3))) * 100)));
+                        } else if (stopCount > 0) {
+                          readiness = 20;
+                        }
+                        return (
+                          <div className="analytics-bar-row" key={trip.id} onClick={() => navigate(`/trips/${trip.id}`)} style={{ cursor: 'pointer' }}>
+                            <div className="analytics-bar-label">
+                              <span className="abr-name" title={trip.name}>{trip.name}</span>
+                              <span className="abr-count">{trip.activity_count || 0} acts · {readiness}%</span>
+                            </div>
+                            <div className="analytics-bar-track">
+                              <div
+                                className="analytics-bar-fill"
+                                style={{
+                                  width: `${readiness}%`,
+                                  background: readiness === 100 ? '#10b981' : readiness >= 50 ? '#3b82f6' : '#f59e0b'
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
 
           {/* RIGHT COLUMN */}
@@ -262,10 +390,12 @@ export default function Dashboard() {
             
             {/* Budget Widget */}
             <div className="widget-card animate-fade-in delay-2 hover-lift">
-              <div className="section-header">
+              <div className="section-header" style={{ marginBottom: '16px' }}>
                 <div>
                   <h2 className="section-title">Budget Overview</h2>
-                  <div className="section-subtitle">Track your expenses and stay on budget</div>
+                  <div className="section-subtitle">
+                    {budgetSummary?.tripName ? `Trip: ${budgetSummary.tripName}` : 'Track your expenses and stay on budget'}
+                  </div>
                 </div>
               </div>
 
@@ -292,21 +422,26 @@ export default function Dashboard() {
 
                   <div className="expense-list">
                     <div style={{fontSize: '13px', fontWeight: 600, marginBottom: '8px'}}>Expense Breakdown</div>
-                    {Object.entries(budgetSummary.categories || {}).map(([cat, amt]) => {
-                      const perc = budgetSummary.totalBudget > 0 ? Math.round((amt / budgetSummary.totalBudget) * 100) : 0;
-                      return (
-                        <div className="expense-item" key={cat}>
-                          <div style={{display:'flex', alignItems:'center', gap:'8px', textTransform:'capitalize'}}>
-                            <div style={{width:'24px', height:'24px', background:'#f8fafc', borderRadius:'4px', display:'flex', alignItems:'center', justifyContent:'center'}}><Wallet size={12}/></div>
-                            {cat}
+                    {Object.entries(budgetSummary.categories || {})
+                      .filter(([_, amt]) => amt > 0)
+                      .map(([cat, amt]) => {
+                        const perc = budgetSummary.totalBudget > 0 ? Math.round((amt / budgetSummary.totalBudget) * 100) : 0;
+                        return (
+                          <div className="expense-item" key={cat}>
+                            <div style={{display:'flex', alignItems:'center', gap:'8px', textTransform:'capitalize'}}>
+                              <div style={{width:'24px', height:'24px', background:'#f8fafc', borderRadius:'4px', display:'flex', alignItems:'center', justifyContent:'center'}}><Wallet size={12}/></div>
+                              {cat}
+                            </div>
+                            <div style={{fontWeight: 600}}>₹{amt.toLocaleString()} <span style={{color:'var(--d-text-gray)', fontSize:'11px', marginLeft:'4px'}}>{perc}%</span></div>
                           </div>
-                          <div style={{fontWeight: 600}}>₹{amt.toLocaleString()} <span style={{color:'var(--d-text-gray)', fontSize:'11px', marginLeft:'4px'}}>{perc}%</span></div>
-                        </div>
-                      )
-                    })}
+                        );
+                      })}
+                    {Object.values(budgetSummary.categories || {}).every(amt => amt === 0) && (
+                      <div style={{ fontSize: '12px', color: 'var(--d-text-light)', padding: '8px 0' }}>No categorized expenses recorded yet</div>
+                    )}
                   </div>
                   
-                  <button className="d-btn-secondary" style={{width:'100%', borderColor:'var(--d-border)', color:'var(--d-primary)', background:'transparent'}} onClick={() => navigate('/budget')}>View Budget Details <ArrowRight size={14}/></button>
+                  <button className="d-btn-secondary" style={{width:'100%', borderColor:'var(--d-border)', color:'var(--d-primary)', background:'transparent'}} onClick={() => navigate('/budget', { state: { tripId: budgetSummary.tripId } })}>View Budget Details <ArrowRight size={14}/></button>
                 </>
               ) : (
                 <div style={{textAlign:'center', color:'var(--d-text-light)', padding:'24px 0'}}>No budget data available</div>
